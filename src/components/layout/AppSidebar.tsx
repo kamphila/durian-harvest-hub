@@ -16,7 +16,6 @@ import { Button } from '@/components/ui/button';
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
 
 const masterMenuItems = [
-  { title: 'บริษัท (ล้ง)', url: '/master/company', icon: Building2 },
   { title: 'สาขา', url: '/master/branch', icon: GitBranch },
   { title: 'แผนก', url: '/master/department', icon: Users },
   { title: 'กลุ่มสินค้า', url: '/master/product-group', icon: Package },
