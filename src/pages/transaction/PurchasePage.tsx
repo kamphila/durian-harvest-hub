@@ -3,13 +3,231 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Card } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Plus, Pencil, Trash2, Search, Printer, Eye } from 'lucide-react';
 import { toast } from 'sonner';
 import { FormInput, FormSelect } from '@/components/shared/FormField';
-import { Purchase, PurchaseItem, PurchaseBasket, mockPurchases } from '@/data/mockTransactions';
+import { Purchase, PurchaseItem, mockPurchases } from '@/data/mockTransactions';
 import { mockSuppliers, mockCuttingTeams, mockProducts, mockGrades, mockBankAccounts } from '@/data/mockData';
+
+function numberToThaiText(n: number): string {
+  if (n === 0) return 'ศูนย์บาทถ้วน';
+  const digits = ['', 'หนึ่ง', 'สอง', 'สาม', 'สี่', 'ห้า', 'หก', 'เจ็ด', 'แปด', 'เก้า'];
+  const positions = ['', 'สิบ', 'ร้อย', 'พัน', 'หมื่น', 'แสน', 'ล้าน'];
+  const baht = Math.floor(n);
+  const satang = Math.round((n - baht) * 100);
+  let result = '';
+  const str = baht.toString();
+  const len = str.length;
+  for (let i = 0; i < len; i++) {
+    const d = parseInt(str[i]);
+    const pos = len - i - 1;
+    if (d === 0) continue;
+    if (pos === 1 && d === 1) { result += 'สิบ'; continue; }
+    if (pos === 1 && d === 2) { result += 'ยี่สิบ'; continue; }
+    if (pos === 0 && d === 1 && len > 1) { result += 'เอ็ด'; continue; }
+    result += digits[d] + positions[pos];
+  }
+  result += 'บาท';
+  if (satang === 0) { result += 'ถ้วน'; } else {
+    const s = satang.toString().padStart(2, '0');
+    const s1 = parseInt(s[0]), s2 = parseInt(s[1]);
+    if (s1 === 1) result += 'สิบ';
+    else if (s1 === 2) result += 'ยี่สิบ';
+    else if (s1 > 0) result += digits[s1] + 'สิบ';
+    if (s2 === 1 && s1 > 0) result += 'เอ็ด';
+    else if (s2 > 0) result += digits[s2];
+    result += 'สตางค์';
+  }
+  return result;
+}
+
+function printDebtDocument(p: Purchase) {
+  const fmt = (n: number) => n.toLocaleString('th-TH', { minimumFractionDigits: 2 });
+  const bank = mockBankAccounts.find(b => b.id === p.bankAccountId);
+  const paymentLabel = p.paymentMethod === 'cash' ? 'เงินสด' : 'โอนเงิน';
+
+  const itemRows = p.items.map((item, idx) => `
+    <tr>
+      <td class="center">${idx + 1}</td>
+      <td>${item.productName}</td>
+      <td>${item.gradeName}</td>
+      <td class="center">${item.baskets.length}</td>
+      <td class="number">${fmt(item.totalWeight)}</td>
+      <td class="number">${fmt(item.pricePerKg)}</td>
+      <td class="number">${fmt(item.amount)}</td>
+    </tr>`).join('');
+
+  const basketDetails = p.items.map((item, idx) => {
+    const bList = item.baskets.map(b => `เข่ง#${b.basketNo}: ${b.weight} กก.`).join(', ');
+    return `<p><strong>รายการ ${idx + 1} (${item.productName} ${item.gradeName}):</strong> ${bList}</p>`;
+  }).join('');
+
+  const html = `<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="UTF-8" />
+<title>ใบตั้งหนี้ ${p.docNo}</title>
+<style>
+  @media print { @page { size: A4; margin: 12mm 18mm; } }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body { font-family: 'Sarabun', 'Tahoma', sans-serif; font-size: 13px; color: #1a1a1a; padding: 16px; }
+  .header { text-align: center; margin-bottom: 18px; border-bottom: 3px double #333; padding-bottom: 12px; }
+  .header h1 { font-size: 20px; font-weight: bold; margin-bottom: 2px; }
+  .header h2 { font-size: 16px; font-weight: bold; }
+  .header h3 { font-size: 12px; font-weight: normal; color: #666; }
+  .doc-row { display: flex; justify-content: space-between; margin-bottom: 14px; font-size: 13px; }
+  .stamp { display: inline-block; border: 2px solid; padding: 3px 12px; font-size: 13px; font-weight: bold; transform: rotate(-5deg); }
+  .stamp.paid { border-color: #16a34a; color: #16a34a; }
+  .stamp.draft { border-color: #f59e0b; color: #f59e0b; }
+  .section { margin-bottom: 14px; }
+  .section-title { font-size: 13px; font-weight: bold; background: #f0f0f0; padding: 5px 10px; margin-bottom: 6px; border-left: 4px solid #333; }
+  .info-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 3px 20px; padding: 0 10px; font-size: 13px; }
+  .info-row { display: flex; gap: 6px; }
+  .info-label { font-weight: bold; min-width: 100px; color: #555; }
+  table { width: 100%; border-collapse: collapse; margin-top: 6px; }
+  th, td { border: 1px solid #bbb; padding: 6px 8px; font-size: 12px; }
+  th { background: #f5f5f5; font-weight: bold; text-align: center; }
+  td.number { text-align: right; font-family: monospace; }
+  td.center { text-align: center; }
+  .total-row td { font-weight: bold; background: #fafafa; font-size: 13px; }
+  .summary { border: 1px solid #bbb; padding: 10px; margin-top: 10px; }
+  .summary-row { display: flex; justify-content: space-between; padding: 2px 0; font-size: 13px; }
+  .summary-row.total { font-size: 15px; font-weight: bold; border-top: 2px solid #333; padding-top: 6px; margin-top: 4px; }
+  .amount-words { padding: 6px 10px; font-size: 12px; background: #fafafa; border: 1px solid #bbb; border-top: 0; }
+  .basket-detail { padding: 6px 10px; font-size: 11px; color: #555; line-height: 1.6; }
+  .signatures { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 16px; margin-top: 36px; text-align: center; }
+  .sig-box { padding-top: 45px; border-top: 1px solid #333; font-size: 12px; }
+  .sig-label { font-size: 10px; color: #666; margin-top: 2px; }
+  .footer { margin-top: 20px; text-align: center; font-size: 10px; color: #999; border-top: 1px solid #ddd; padding-top: 6px; }
+</style>
+</head>
+<body>
+  <div class="header">
+    <h1>🍈 ระบบล้งทุเรียน</h1>
+    <h2>ใบตั้งหนี้ / ใบรับซื้อ (Accounts Payable Voucher)</h2>
+    <h3>เอกสารตั้งหนี้จากการรับซื้อผลผลิต</h3>
+  </div>
+
+  <div class="doc-row">
+    <div><strong>เลขที่เอกสาร:</strong> ${p.docNo}</div>
+    <div><strong>วันที่:</strong> ${p.date}</div>
+    <div><span class="stamp ${p.status}">${p.status === 'paid' ? 'จ่ายแล้ว' : 'ร่าง'}</span></div>
+  </div>
+
+  <div class="section">
+    <div class="section-title">ข้อมูลผู้จำหน่าย / สายตัด</div>
+    <div class="info-grid">
+      <div class="info-row">
+        <span class="info-label">ผู้จำหน่าย (สวน):</span>
+        <span>${p.supplierName}</span>
+      </div>
+      <div class="info-row">
+        <span class="info-label">สายตัด:</span>
+        <span>${p.cuttingTeamName}</span>
+      </div>
+      <div class="info-row">
+        <span class="info-label">ทะเบียนรถ:</span>
+        <span>${p.licensePlate}</span>
+      </div>
+      <div class="info-row">
+        <span class="info-label">วิธีชำระเงิน:</span>
+        <span>${paymentLabel}</span>
+      </div>
+      ${bank ? `<div class="info-row">
+        <span class="info-label">บัญชีธนาคาร:</span>
+        <span>${bank.bank} - ${bank.accountNo} (${bank.name})</span>
+      </div>` : ''}
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-title">รายละเอียดสินค้าที่รับซื้อ</div>
+    <table>
+      <thead>
+        <tr>
+          <th style="width:5%">ลำดับ</th>
+          <th>สินค้า</th>
+          <th>เกรด</th>
+          <th>จำนวนเข่ง</th>
+          <th style="text-align:right">น้ำหนัก (กก.)</th>
+          <th style="text-align:right">ราคา/กก.</th>
+          <th style="text-align:right">จำนวนเงิน (บาท)</th>
+        </tr>
+      </thead>
+      <tbody>
+        ${itemRows}
+        <tr class="total-row">
+          <td colspan="4" style="text-align:right;">รวมทั้งหมด</td>
+          <td class="number">${fmt(p.totalWeight)}</td>
+          <td></td>
+          <td class="number">฿${fmt(p.totalAmount)}</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="section">
+    <div class="section-title">รายละเอียดเข่ง</div>
+    <div class="basket-detail">
+      ${basketDetails}
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-title">สรุปยอดเงิน</div>
+    <div class="summary">
+      <div class="summary-row"><span>รวมค่าสินค้า</span><span>฿${fmt(p.totalAmount)}</span></div>
+      <div class="summary-row"><span>หักมัดจำล่วงหน้า</span><span>- ฿${fmt(p.deposit)}</span></div>
+      <div class="summary-row total"><span>ยอดตั้งหนี้สุทธิ</span><span>฿${fmt(p.netAmount)}</span></div>
+    </div>
+    <div class="amount-words">
+      <strong>จำนวนเงิน (ตัวอักษร):</strong> ${numberToThaiText(p.netAmount)}
+    </div>
+  </div>
+
+  <div class="signatures">
+    <div>
+      <div class="sig-box">ผู้รับซื้อ / ผู้ตั้งหนี้</div>
+      <div class="sig-label">วันที่ ____/____/____</div>
+    </div>
+    <div>
+      <div class="sig-box">ผู้จำหน่าย / เจ้าหนี้</div>
+      <div class="sig-label">วันที่ ____/____/____</div>
+    </div>
+    <div>
+      <div class="sig-box">ผู้อนุมัติ</div>
+      <div class="sig-label">วันที่ ____/____/____</div>
+    </div>
+  </div>
+
+  <div class="footer">
+    เอกสารนี้พิมพ์จากระบบล้งทุเรียน — พิมพ์เมื่อ ${new Date().toLocaleString('th-TH')}
+  </div>
+</body>
+</html>`;
+
+  const iframe = document.createElement('iframe');
+  iframe.style.position = 'fixed';
+  iframe.style.left = '-9999px';
+  iframe.style.top = '0';
+  iframe.style.width = '210mm';
+  iframe.style.height = '297mm';
+  document.body.appendChild(iframe);
+
+  const doc = iframe.contentDocument || iframe.contentWindow?.document;
+  if (doc) {
+    doc.open();
+    doc.write(html);
+    doc.close();
+    iframe.onload = () => {
+      iframe.contentWindow?.focus();
+      iframe.contentWindow?.print();
+      setTimeout(() => document.body.removeChild(iframe), 1000);
+    };
+  }
+}
 
 export default function PurchasePage() {
   const [data, setData] = useState<Purchase[]>(mockPurchases);
@@ -158,6 +376,9 @@ export default function PurchasePage() {
                 </TableCell>
                 <TableCell className="text-center">
                   <div className="flex items-center justify-center gap-1">
+                    <Button variant="ghost" size="icon" className="h-7 w-7 text-primary hover:text-primary" onClick={() => printDebtDocument(p)} title="พิมพ์ใบตั้งหนี้">
+                      <Printer className="h-3.5 w-3.5" />
+                    </Button>
                     <Button variant="ghost" size="icon" className="h-7 w-7" onClick={() => { setSelectedPurchase(p); setDetailOpen(true); }}>
                       <Eye className="h-3.5 w-3.5" />
                     </Button>
@@ -291,7 +512,7 @@ export default function PurchasePage() {
                 <p>หักมัดจำ: ฿{fmt(selectedPurchase.deposit)}</p>
                 <p className="text-lg font-bold text-primary">สุทธิ: ฿{fmt(selectedPurchase.netAmount)}</p>
               </div>
-              <Button variant="outline" className="w-full" onClick={() => toast.info('พิมพ์ใบจ่ายเงิน...')}><Printer className="h-4 w-4 mr-1" /> พิมพ์ใบจ่ายเงิน</Button>
+              <Button variant="outline" className="w-full" onClick={() => printDebtDocument(selectedPurchase)}><Printer className="h-4 w-4 mr-1" /> พิมพ์ใบตั้งหนี้</Button>
             </div>
           )}
         </DialogContent>
