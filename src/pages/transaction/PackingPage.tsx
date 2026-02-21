@@ -10,8 +10,9 @@ import { toast } from 'sonner';
 import { FormInput, FormSelect } from '@/components/shared/FormField';
 import { Packing, PackingItem, mockPackings } from '@/data/mockTransactions';
 import { mockProducts, mockGrades, mockUnits } from '@/data/mockData';
+import QRCode from 'qrcode';
 
-function printLabel(packing: Packing) {
+async function printLabel(packing: Packing) {
   const labels = packing.items.flatMap((item) => {
     return Array.from({ length: item.quantity }, (_, i) => ({
       productName: item.productName,
@@ -26,6 +27,21 @@ function printLabel(packing: Packing) {
       docNo: packing.docNo,
     }));
   });
+
+  // Generate QR codes as data URLs
+  const qrImages = await Promise.all(
+    labels.map((l) => {
+      const qrData = JSON.stringify({
+        lot: l.lotNo,
+        box: l.boxNo,
+        product: l.productName,
+        grade: l.gradeName,
+        date: l.packDate,
+        source: l.sourceSupplier,
+      });
+      return QRCode.toDataURL(qrData, { width: 120, margin: 1 });
+    })
+  );
 
   const labelHtml = labels.map((l, idx) => `
     <div class="label" ${idx > 0 && idx % 4 === 0 ? 'style="page-break-before:always;"' : ''}>
@@ -58,7 +74,7 @@ function printLabel(packing: Packing) {
           </div>
         </div>
         <div class="qr-section">
-          <div class="qr-placeholder">QR</div>
+          <img src="${qrImages[idx]}" class="qr-img" alt="QR" />
           <div class="qr-text">${l.lotNo}-${String(l.boxNo).padStart(3, '0')}</div>
         </div>
       </div>
@@ -123,11 +139,8 @@ function printLabel(packing: Packing) {
   .lbl { font-size: 9px; color: #666; text-transform: uppercase; letter-spacing: 0.5px; }
   .val { font-size: 12px; font-weight: bold; }
   .qr-section { display: flex; align-items: center; gap: 8px; margin-top: 4px; }
-  .qr-placeholder {
-    width: 50px; height: 50px;
-    border: 2px solid #222;
-    display: flex; align-items: center; justify-content: center;
-    font-size: 10px; font-weight: bold; color: #999;
+  .qr-img {
+    width: 60px; height: 60px;
   }
   .qr-text { font-family: monospace; font-size: 10px; color: #555; }
   .label-footer {
