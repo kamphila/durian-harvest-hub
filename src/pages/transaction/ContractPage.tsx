@@ -6,6 +6,7 @@ import { Button } from '@/components/ui/button';
 import { Contract, mockContracts } from '@/data/mockTransactions';
 import { mockSuppliers, mockBankAccounts } from '@/data/mockData';
 import { Printer } from 'lucide-react';
+import html2pdf from 'html2pdf.js';
 
 function printContract(contract: Contract) {
   const supplier = mockSuppliers.find(s => s.id === contract.supplierId);
@@ -156,13 +157,23 @@ function printContract(contract: Contract) {
 </body>
 </html>`;
 
-  const printWindow = window.open('', '_blank');
-  if (printWindow) {
-    printWindow.document.write(html);
-    printWindow.document.close();
-    printWindow.focus();
-    setTimeout(() => printWindow.print(), 300);
-  }
+  const container = document.createElement('div');
+  container.innerHTML = html;
+  document.body.appendChild(container);
+
+  html2pdf()
+    .set({
+      margin: [10, 15, 10, 15],
+      filename: `สัญญาซื้อเหมา_${contract.docNo}.pdf`,
+      image: { type: 'jpeg', quality: 0.98 },
+      html2canvas: { scale: 2, useCORS: true },
+      jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' },
+    })
+    .from(container.firstElementChild)
+    .save()
+    .then(() => {
+      document.body.removeChild(container);
+    });
 }
 
 export default function ContractPage() {
