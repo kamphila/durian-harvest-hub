@@ -21,10 +21,11 @@ interface CrudPageProps<T extends { id: string }> {
   onDelete: (id: string) => void;
   renderForm: (item: Partial<T>, onChange: (field: keyof T, value: any) => void) => ReactNode;
   defaultItem: Partial<T>;
+  extraActions?: (item: T) => ReactNode;
 }
 
 export function CrudPage<T extends { id: string }>({
-  title, data, columns, onAdd, onEdit, onDelete, renderForm, defaultItem,
+  title, data, columns, onAdd, onEdit, onDelete, renderForm, defaultItem, extraActions,
 }: CrudPageProps<T>) {
   const [search, setSearch] = useState('');
   const [dialogOpen, setDialogOpen] = useState(false);
@@ -103,6 +104,7 @@ export function CrudPage<T extends { id: string }>({
                   ))}
                   <TableCell className="text-center">
                     <div className="flex items-center justify-center gap-1">
+                      {extraActions && extraActions(item)}
                       <Button variant="ghost" size="icon" className="h-7 w-7 text-info hover:text-info" onClick={() => openEdit(item)}>
                         <Pencil className="h-3.5 w-3.5" />
                       </Button>
