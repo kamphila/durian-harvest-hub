@@ -43,6 +43,7 @@ import AlertsDashboard from "./pages/dashboard/AlertsDashboard";
 import FinanceReport from "./pages/reports/FinanceReport";
 import AdminOverviewPage from "./pages/admin/AdminOverviewPage";
 import UserManagementPage from "./pages/admin/UserManagementPage";
+
 const queryClient = new QueryClient();
 
 function ProtectedRoutes() {
