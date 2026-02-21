@@ -31,21 +31,18 @@ interface AuthContextType {
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
-const MOCK_USER: User = {
-  id: '1',
-  name: 'ผู้ดูแลระบบ',
-  email: 'admin@durian.com',
-  role: 'admin',
-  companyId: '',
-  companyName: '(ดูแลทุกบริษัท)',
-};
+const MOCK_ACCOUNTS: User[] = [
+  { id: '1', name: 'ผู้ดูแลระบบ', email: 'admin@durian.com', role: 'admin', companyId: '', companyName: '(ดูแลทุกบริษัท)' },
+  { id: '2', name: 'สมชาย ทุเรียนทอง', email: 'owner@durian.com', role: 'owner', companyId: 'C001', companyName: 'ล้งทุเรียนทอง จำกัด' },
+  { id: '3', name: 'สมหญิง รับซื้อ', email: 'purchase@durian.com', role: 'purchase', companyId: 'C001', companyName: 'ล้งทุเรียนทอง จำกัด' },
+];
 
 export function AuthProvider({ children }: { children: ReactNode }) {
   const [user, setUser] = useState<User | null>(null);
 
   const login = (email: string, _password: string) => {
-    // Mock login
-    setUser(MOCK_USER);
+    const found = MOCK_ACCOUNTS.find(u => u.email === email);
+    setUser(found || MOCK_ACCOUNTS[0]);
     return true;
   };
 
