@@ -1,4 +1,6 @@
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
+import { Printer } from 'lucide-react';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, PieChart, Pie, Cell, Legend } from 'recharts';
 
 const yieldDaily = [
@@ -23,7 +25,10 @@ const stats = [
 export default function GradingDashboard() {
   return (
     <div className="space-y-4">
-      <h1 className="text-lg font-bold">📊 Dashboard ฝ่ายคัดเกรด</h1>
+      <div className="flex items-center justify-between print:mb-4">
+        <h1 className="text-lg font-bold">📊 Dashboard ฝ่ายคัดเกรด</h1>
+        <Button variant="outline" size="sm" className="print:hidden" onClick={() => window.print()}><Printer className="h-4 w-4 mr-1" />พิมพ์รายงาน</Button>
+      </div>
       <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
         {stats.map((s) => (
           <Card key={s.label}>

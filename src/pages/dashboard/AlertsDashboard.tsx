@@ -1,6 +1,7 @@
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { AlertTriangle, TrendingDown, DollarSign, Truck, Clock } from 'lucide-react';
+import { Button } from '@/components/ui/button';
+import { AlertTriangle, TrendingDown, DollarSign, Truck, Clock, Printer } from 'lucide-react';
 
 const alerts = [
   { id: 1, type: 'yield', icon: TrendingDown, title: 'Yield ต่ำกว่า 65%', desc: 'LOT-20250614-002 Yield 62.3% ต่ำกว่าเกณฑ์ 65%', severity: 'error', time: '2 ชม. ที่แล้ว' },
@@ -17,11 +18,12 @@ export default function AlertsDashboard() {
 
   return (
     <div className="space-y-4">
-      <div className="flex items-center justify-between">
+      <div className="flex items-center justify-between print:mb-4">
         <h1 className="text-lg font-bold">🔔 ระบบแจ้งเตือน</h1>
-        <div className="flex gap-2">
+        <div className="flex gap-2 items-center">
           <Badge variant="destructive">{errorCount} เร่งด่วน</Badge>
           <Badge variant="secondary">{warningCount} เตือน</Badge>
+          <Button variant="outline" size="sm" className="print:hidden" onClick={() => window.print()}><Printer className="h-4 w-4 mr-1" />พิมพ์</Button>
         </div>
       </div>
 

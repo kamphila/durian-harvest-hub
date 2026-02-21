@@ -1,7 +1,8 @@
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
+import { Button } from '@/components/ui/button';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
-import { TrendingUp, TrendingDown, Package, Truck, DollarSign, BarChart3 } from 'lucide-react';
+import { TrendingUp, TrendingDown, Package, Truck, DollarSign, BarChart3, Printer } from 'lucide-react';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, LineChart, Line, PieChart, Pie, Cell, Legend } from 'recharts';
 
 const purchaseTrend = [
@@ -42,7 +43,10 @@ const stats = [
 export default function ExecutiveDashboard() {
   return (
     <div className="space-y-4">
-      <h1 className="text-lg font-bold">📊 Dashboard ผู้บริหาร</h1>
+      <div className="flex items-center justify-between print:mb-4">
+        <h1 className="text-lg font-bold">📊 Dashboard ผู้บริหาร</h1>
+        <Button variant="outline" size="sm" className="print:hidden" onClick={() => window.print()}><Printer className="h-4 w-4 mr-1" />พิมพ์รายงาน</Button>
+      </div>
 
       <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-3">
         {stats.map((s) => (
