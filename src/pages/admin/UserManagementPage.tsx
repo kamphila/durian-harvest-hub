@@ -6,6 +6,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Badge } from '@/components/ui/badge';
+import { Checkbox } from '@/components/ui/checkbox';
 import { Plus, Pencil, Trash2, Search, UserCog } from 'lucide-react';
 import { toast } from '@/hooks/use-toast';
 import { mockUsers, MockUser } from '@/data/mockUsers';
@@ -25,7 +26,7 @@ export default function UserManagementPage() {
 
   const openAdd = () => {
     setEditingUser(null);
-    setForm({ name: '', email: '', role: 'purchase', companyId: '', companyName: '', active: true });
+    setForm({ name: '', email: '', role: 'purchase', companyId: '', companyName: '', active: true, noExpiry: true, expiryDate: '' });
     setDialogOpen(true);
   };
 
@@ -53,6 +54,10 @@ export default function UserManagementPage() {
       toast({ title: 'กรุณาเลือกบริษัทที่สังกัด', variant: 'destructive' });
       return;
     }
+    if (!form.noExpiry && !form.expiryDate) {
+      toast({ title: 'กรุณาระบุวันหมดอายุ', variant: 'destructive' });
+      return;
+    }
     if (editingUser) {
       setUsers(prev => prev.map(u => u.id === editingUser.id ? { ...u, ...form } as MockUser : u));
       toast({ title: 'แก้ไขผู้ใช้งานสำเร็จ' });
@@ -65,6 +70,8 @@ export default function UserManagementPage() {
         companyId: form.companyId || '',
         companyName: form.companyName || '',
         active: form.active ?? true,
+        noExpiry: form.noExpiry ?? true,
+        expiryDate: form.noExpiry ? undefined : form.expiryDate,
       };
       setUsers(prev => [...prev, newUser]);
       toast({ title: 'เพิ่มผู้ใช้งานสำเร็จ' });
@@ -91,6 +98,17 @@ export default function UserManagementPage() {
     return colors[role] || '';
   };
 
+  const formatExpiry = (u: MockUser) => {
+    if (u.noExpiry) return <span className="text-muted-foreground">ไม่มีวันหมดอายุ</span>;
+    if (!u.expiryDate) return '-';
+    const isExpired = new Date(u.expiryDate) < new Date();
+    return (
+      <span className={isExpired ? 'text-destructive font-medium' : ''}>
+        {u.expiryDate} {isExpired && '(หมดอายุ)'}
+      </span>
+    );
+  };
+
   return (
     <div className="space-y-4">
       <div className="flex items-center justify-between">
@@ -115,6 +133,7 @@ export default function UserManagementPage() {
                 <TableHead>อีเมล</TableHead>
                 <TableHead>บทบาท</TableHead>
                 <TableHead>บริษัทที่สังกัด</TableHead>
+                <TableHead>วันหมดอายุ</TableHead>
                 <TableHead>สถานะ</TableHead>
                 <TableHead className="text-right">จัดการ</TableHead>
               </TableRow>
@@ -128,6 +147,7 @@ export default function UserManagementPage() {
                     <Badge className={roleColor(u.role)}>{ROLE_LABELS[u.role]}</Badge>
                   </TableCell>
                   <TableCell>{u.companyName}</TableCell>
+                  <TableCell>{formatExpiry(u)}</TableCell>
                   <TableCell>
                     <Badge variant={u.active ? 'default' : 'secondary'}>
                       {u.active ? 'ใช้งาน' : 'ปิดใช้งาน'}
@@ -140,7 +160,7 @@ export default function UserManagementPage() {
                 </TableRow>
               ))}
               {filtered.length === 0 && (
-                <TableRow><TableCell colSpan={6} className="text-center text-muted-foreground py-8">ไม่พบข้อมูล</TableCell></TableRow>
+                <TableRow><TableCell colSpan={7} className="text-center text-muted-foreground py-8">ไม่พบข้อมูล</TableCell></TableRow>
               )}
             </TableBody>
           </Table>
@@ -187,10 +207,30 @@ export default function UserManagementPage() {
                   ))}
                 </SelectContent>
               </Select>
-              {form.role !== 'admin' && (
-                <p className="text-xs text-muted-foreground mt-1">* 1 ผู้ใช้งาน สังกัดได้ 1 บริษัทเท่านั้น</p>
+            </div>
+
+            {/* Expiry section */}
+            <div className="space-y-2 rounded-md border p-3">
+              <div className="flex items-center gap-2">
+                <Checkbox
+                  id="noExpiry"
+                  checked={form.noExpiry ?? true}
+                  onCheckedChange={(checked) => setForm(f => ({ ...f, noExpiry: !!checked, expiryDate: checked ? '' : f.expiryDate }))}
+                />
+                <label htmlFor="noExpiry" className="text-sm font-medium cursor-pointer">ไม่มีวันหมดอายุ</label>
+              </div>
+              {!form.noExpiry && (
+                <div>
+                  <label className="text-sm font-medium">วันหมดอายุ</label>
+                  <Input
+                    type="date"
+                    value={form.expiryDate || ''}
+                    onChange={e => setForm(f => ({ ...f, expiryDate: e.target.value }))}
+                  />
+                </div>
               )}
             </div>
+
             <div className="flex items-center gap-2">
               <label className="text-sm font-medium">สถานะ:</label>
               <Button

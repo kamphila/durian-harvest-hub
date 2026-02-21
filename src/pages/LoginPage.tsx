@@ -4,27 +4,39 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Card, CardContent, CardHeader } from '@/components/ui/card';
+import { toast } from '@/hooks/use-toast';
 
 const DEMO_ACCOUNTS = [
   { email: 'admin@durian.com', password: '1234', role: 'ผู้ดูแลระบบ', desc: 'เห็นเมนูจัดการผู้ใช้/บริษัท' },
   { email: 'owner@durian.com', password: '1234', role: 'เจ้าของล้ง', desc: 'เห็นเมนูทั้งหมดของบริษัท' },
-  { email: 'purchase@durian.com', password: '1234', role: 'ฝ่ายรับซื้อ', desc: 'เห็นเมนูปกติ' },
+  { email: 'purchase@durian.com', password: '1234', role: 'ฝ่ายรับซื้อ', desc: 'เห็นเฉพาะเอกสาร' },
 ];
 
 export default function LoginPage() {
   const { login } = useAuth();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [error, setError] = useState('');
+
+  const attemptLogin = (loginEmail: string, loginPassword: string) => {
+    const result = login(loginEmail, loginPassword);
+    if (!result.success) {
+      setError(result.error || 'เข้าสู่ระบบไม่สำเร็จ');
+      toast({ title: 'เข้าสู่ระบบไม่สำเร็จ', description: result.error, variant: 'destructive' });
+    }
+  };
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    login(email, password);
+    setError('');
+    attemptLogin(email, password);
   };
 
   const quickLogin = (demoEmail: string) => {
     setEmail(demoEmail);
     setPassword('1234');
-    login(demoEmail, '1234');
+    setError('');
+    attemptLogin(demoEmail, '1234');
   };
 
   return (
@@ -45,6 +57,9 @@ export default function LoginPage() {
               <Label htmlFor="password" className="text-xs">รหัสผ่าน</Label>
               <Input id="password" type="password" value={password} onChange={(e) => setPassword(e.target.value)} placeholder="••••" />
             </div>
+            {error && (
+              <p className="text-xs text-destructive text-center bg-destructive/10 rounded-md p-2">{error}</p>
+            )}
             <Button type="submit" className="w-full">เข้าสู่ระบบ</Button>
           </form>
 

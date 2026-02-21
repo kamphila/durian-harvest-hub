@@ -1,4 +1,5 @@
 import React, { createContext, useContext, useState, ReactNode } from 'react';
+import { mockUsers } from '@/data/mockUsers';
 
 export type UserRole = 'admin' | 'owner' | 'manager' | 'purchase' | 'grading' | 'warehouse' | 'sales' | 'finance';
 
@@ -24,7 +25,7 @@ interface User {
 
 interface AuthContextType {
   user: User | null;
-  login: (email: string, password: string) => boolean;
+  login: (email: string, password: string) => { success: boolean; error?: string };
   logout: () => void;
   isAuthenticated: boolean;
 }
@@ -40,10 +41,32 @@ const MOCK_ACCOUNTS: User[] = [
 export function AuthProvider({ children }: { children: ReactNode }) {
   const [user, setUser] = useState<User | null>(null);
 
-  const login = (email: string, _password: string) => {
+  const login = (email: string, _password: string): { success: boolean; error?: string } => {
+    // Check expiry from mockUsers data
+    const mockUser = mockUsers.find(u => u.email === email);
+    if (mockUser) {
+      if (!mockUser.active) {
+        return { success: false, error: 'บัญชีนี้ถูกปิดใช้งาน กรุณาติดต่อผู้ดูแลระบบ' };
+      }
+      if (!mockUser.noExpiry && mockUser.expiryDate) {
+        if (new Date(mockUser.expiryDate) < new Date()) {
+          return { success: false, error: `บัญชีหมดอายุเมื่อ ${mockUser.expiryDate} กรุณาติดต่อผู้ดูแลระบบ` };
+        }
+      }
+    }
+
     const found = MOCK_ACCOUNTS.find(u => u.email === email);
-    setUser(found || MOCK_ACCOUNTS[0]);
-    return true;
+    if (found) {
+      setUser(found);
+      return { success: true };
+    }
+    // fallback: if email matches mockUsers but not MOCK_ACCOUNTS
+    if (mockUser) {
+      setUser({ id: mockUser.id, name: mockUser.name, email: mockUser.email, role: mockUser.role, companyId: mockUser.companyId, companyName: mockUser.companyName });
+      return { success: true };
+    }
+    setUser(MOCK_ACCOUNTS[0]);
+    return { success: true };
   };
 
   const logout = () => setUser(null);
