@@ -2,13 +2,12 @@ import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
+import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { AuthProvider, useAuth } from "./contexts/AuthContext";
 import { AppLayout } from "./components/layout/AppLayout";
 import LoginPage from "./pages/LoginPage";
 import HomePage from "./pages/HomePage";
 import NotFound from "./pages/NotFound";
-import PlaceholderPage from "./pages/PlaceholderPage";
 
 // Master Data
 import CompanyPage from "./pages/master/CompanyPage";
@@ -22,6 +21,26 @@ import CuttingTeamPage from "./pages/master/CuttingTeamPage";
 import SupplierPage from "./pages/master/SupplierPage";
 import CustomerPage from "./pages/master/CustomerPage";
 import BankAccountPage from "./pages/master/BankAccountPage";
+
+// Transactions
+import PurchasePage from "./pages/transaction/PurchasePage";
+import ContractPage from "./pages/transaction/ContractPage";
+import AdvancePaymentPage from "./pages/transaction/AdvancePaymentPage";
+import PackingPage from "./pages/transaction/PackingPage";
+import SalesPage from "./pages/transaction/SalesPage";
+import DepositReceivePage from "./pages/transaction/DepositReceivePage";
+import ExpensePage from "./pages/transaction/ExpensePage";
+import InventoryPage from "./pages/transaction/InventoryPage";
+
+// Dashboards
+import ExecutiveDashboard from "./pages/dashboard/ExecutiveDashboard";
+import PurchaseDashboard from "./pages/dashboard/PurchaseDashboard";
+import GradingDashboard from "./pages/dashboard/GradingDashboard";
+import WarehouseDashboard from "./pages/dashboard/WarehouseDashboard";
+import SalesDashboard from "./pages/dashboard/SalesDashboard";
+import ProfitDashboard from "./pages/dashboard/ProfitDashboard";
+import AlertsDashboard from "./pages/dashboard/AlertsDashboard";
+import FinanceReport from "./pages/reports/FinanceReport";
 
 const queryClient = new QueryClient();
 
@@ -48,26 +67,26 @@ function ProtectedRoutes() {
         <Route path="/master/bank-account" element={<BankAccountPage />} />
 
         {/* Transactions */}
-        <Route path="/transaction/purchase" element={<PlaceholderPage title="รับซื้อ" />} />
-        <Route path="/transaction/contract" element={<PlaceholderPage title="สัญญาซื้อเหมาสวน" />} />
-        <Route path="/transaction/advance-payment" element={<PlaceholderPage title="จ่ายมัดจำล่วงหน้า" />} />
-        <Route path="/transaction/packing" element={<PlaceholderPage title="แพ็คกิ้ง" />} />
-        <Route path="/transaction/sales" element={<PlaceholderPage title="ขาย/ส่งออก" />} />
-        <Route path="/transaction/deposit-receive" element={<PlaceholderPage title="รับมัดจำ (ลูกค้า)" />} />
-        <Route path="/transaction/expense" element={<PlaceholderPage title="บันทึกค่าใช้จ่าย" />} />
-        <Route path="/transaction/inventory" element={<PlaceholderPage title="คลังสินค้า" />} />
+        <Route path="/transaction/purchase" element={<PurchasePage />} />
+        <Route path="/transaction/contract" element={<ContractPage />} />
+        <Route path="/transaction/advance-payment" element={<AdvancePaymentPage />} />
+        <Route path="/transaction/packing" element={<PackingPage />} />
+        <Route path="/transaction/sales" element={<SalesPage />} />
+        <Route path="/transaction/deposit-receive" element={<DepositReceivePage />} />
+        <Route path="/transaction/expense" element={<ExpensePage />} />
+        <Route path="/transaction/inventory" element={<InventoryPage />} />
 
         {/* Dashboards */}
-        <Route path="/dashboard/executive" element={<PlaceholderPage title="Dashboard ผู้บริหาร" />} />
-        <Route path="/dashboard/purchase" element={<PlaceholderPage title="Dashboard ฝ่ายรับซื้อ" />} />
-        <Route path="/dashboard/grading" element={<PlaceholderPage title="Dashboard ฝ่ายคัดเกรด" />} />
-        <Route path="/dashboard/warehouse" element={<PlaceholderPage title="Dashboard คลังสินค้า" />} />
-        <Route path="/dashboard/sales" element={<PlaceholderPage title="Dashboard ฝ่ายขาย" />} />
-        <Route path="/dashboard/profit" element={<PlaceholderPage title="Dashboard วิเคราะห์กำไร" />} />
-        <Route path="/dashboard/alerts" element={<PlaceholderPage title="ระบบแจ้งเตือน" />} />
+        <Route path="/dashboard/executive" element={<ExecutiveDashboard />} />
+        <Route path="/dashboard/purchase" element={<PurchaseDashboard />} />
+        <Route path="/dashboard/grading" element={<GradingDashboard />} />
+        <Route path="/dashboard/warehouse" element={<WarehouseDashboard />} />
+        <Route path="/dashboard/sales" element={<SalesDashboard />} />
+        <Route path="/dashboard/profit" element={<ProfitDashboard />} />
+        <Route path="/dashboard/alerts" element={<AlertsDashboard />} />
 
         {/* Reports */}
-        <Route path="/reports/finance" element={<PlaceholderPage title="รายงานการเงิน" />} />
+        <Route path="/reports/finance" element={<FinanceReport />} />
 
         <Route path="*" element={<NotFound />} />
       </Routes>
