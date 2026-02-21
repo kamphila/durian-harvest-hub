@@ -6,7 +6,6 @@ import { Button } from '@/components/ui/button';
 import { Contract, mockContracts } from '@/data/mockTransactions';
 import { mockSuppliers, mockBankAccounts } from '@/data/mockData';
 import { Printer } from 'lucide-react';
-import html2pdf from 'html2pdf.js';
 
 function printContract(contract: Contract) {
   const supplier = mockSuppliers.find(s => s.id === contract.supplierId);
@@ -157,26 +156,25 @@ function printContract(contract: Contract) {
 </body>
 </html>`;
 
-  const container = document.createElement('div');
-  container.style.position = 'fixed';
-  container.style.left = '-9999px';
-  container.style.top = '0';
-  container.innerHTML = html;
-  document.body.appendChild(container);
+  const iframe = document.createElement('iframe');
+  iframe.style.position = 'fixed';
+  iframe.style.left = '-9999px';
+  iframe.style.top = '0';
+  iframe.style.width = '210mm';
+  iframe.style.height = '297mm';
+  document.body.appendChild(iframe);
 
-  html2pdf()
-    .set({
-      margin: [10, 15, 10, 15],
-      filename: `สัญญาซื้อเหมา_${contract.docNo}.pdf`,
-      image: { type: 'jpeg', quality: 0.98 },
-      html2canvas: { scale: 2, useCORS: true },
-      jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' },
-    })
-    .from(container.firstElementChild)
-    .save()
-    .then(() => {
-      document.body.removeChild(container);
-    });
+  const doc = iframe.contentDocument || iframe.contentWindow?.document;
+  if (doc) {
+    doc.open();
+    doc.write(html);
+    doc.close();
+    iframe.onload = () => {
+      iframe.contentWindow?.focus();
+      iframe.contentWindow?.print();
+      setTimeout(() => document.body.removeChild(iframe), 1000);
+    };
+  }
 }
 
 export default function ContractPage() {
