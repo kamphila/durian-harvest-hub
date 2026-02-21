@@ -3,8 +3,28 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
-import { Plus, Pencil, Trash2, Search } from 'lucide-react';
+import { Plus, Pencil, Trash2, Search, Download } from 'lucide-react';
 import { toast } from 'sonner';
+
+function exportToExcel<T extends { id: string }>(data: T[], columns: Column<T>[], title: string) {
+  const headers = columns.map(c => c.label);
+  const rows = data.map(item =>
+    columns.map(col => {
+      const val = (item as any)[col.key];
+      return val != null ? String(val) : '';
+    })
+  );
+  const BOM = '\uFEFF';
+  const csv = BOM + [headers.join(','), ...rows.map(r => r.map(v => `"${v.replace(/"/g, '""')}"`).join(','))].join('\n');
+  const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = `${title}_${new Date().toISOString().split('T')[0]}.csv`;
+  a.click();
+  URL.revokeObjectURL(url);
+  toast.success(`ส่งออกข้อมูล ${data.length} รายการเรียบร้อย`);
+}
 
 export interface Column<T> {
   key: keyof T | string;
@@ -73,6 +93,9 @@ export function CrudPage<T extends { id: string }>({
             <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
             <Input placeholder="ค้นหา..." value={search} onChange={(e) => setSearch(e.target.value)} className="pl-9 h-9" />
           </div>
+          <Button variant="outline" size="sm" className="shrink-0" onClick={() => exportToExcel(filtered, columns, title)}>
+            <Download className="h-4 w-4 mr-1" /> Export
+          </Button>
           <Button onClick={openAdd} size="sm" className="shrink-0">
             <Plus className="h-4 w-4 mr-1" /> เพิ่ม
           </Button>
