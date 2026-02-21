@@ -41,7 +41,8 @@ import SalesDashboard from "./pages/dashboard/SalesDashboard";
 import ProfitDashboard from "./pages/dashboard/ProfitDashboard";
 import AlertsDashboard from "./pages/dashboard/AlertsDashboard";
 import FinanceReport from "./pages/reports/FinanceReport";
-
+import AdminOverviewPage from "./pages/admin/AdminOverviewPage";
+import UserManagementPage from "./pages/admin/UserManagementPage";
 const queryClient = new QueryClient();
 
 function ProtectedRoutes() {
@@ -52,6 +53,10 @@ function ProtectedRoutes() {
     <AppLayout>
       <Routes>
         <Route path="/" element={<HomePage />} />
+
+        {/* Admin */}
+        <Route path="/admin/overview" element={<AdminOverviewPage />} />
+        <Route path="/admin/users" element={<UserManagementPage />} />
 
         {/* Master Data */}
         <Route path="/master/company" element={<CompanyPage />} />

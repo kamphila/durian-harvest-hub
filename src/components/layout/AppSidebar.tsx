@@ -2,7 +2,7 @@ import {
   Building2, GitBranch, Users, Package, Ruler, ShoppingCart, Star,
   Scissors, TreeDeciduous, UserCheck, BookOpen, LayoutDashboard,
   FileText, BarChart3, Receipt, Truck, BoxesIcon, Wallet, AlertTriangle,
-  DollarSign, TrendingUp, LogOut, ChevronDown
+  DollarSign, TrendingUp, LogOut, ChevronDown, ShieldCheck, UserCog
 } from 'lucide-react';
 import { NavLink } from '@/components/NavLink';
 import { useAuth, ROLE_LABELS } from '@/contexts/AuthContext';
@@ -48,6 +48,12 @@ const dashboardMenuItems = [
   { title: 'ฝ่ายขาย', url: '/dashboard/sales', icon: BarChart3 },
   { title: 'วิเคราะห์กำไร', url: '/dashboard/profit', icon: DollarSign },
   { title: 'แจ้งเตือน', url: '/dashboard/alerts', icon: AlertTriangle },
+];
+
+const adminMenuItems = [
+  { title: 'ภาพรวมระบบ', url: '/admin/overview', icon: ShieldCheck },
+  { title: 'จัดการผู้ใช้ / Role', url: '/admin/users', icon: UserCog },
+  { title: 'บริษัท (ล้ง)', url: '/master/company', icon: Building2 },
 ];
 
 const reportMenuItems = [
@@ -117,6 +123,10 @@ export function AppSidebar() {
             </SidebarMenu>
           </SidebarGroupContent>
         </SidebarGroup>
+
+        {user?.role === 'admin' && (
+          <MenuGroup label="ผู้ดูแลระบบ" items={adminMenuItems} defaultOpen />
+        )}
 
         <MenuGroup label="ข้อมูลหลัก" items={masterMenuItems} defaultOpen />
         <MenuGroup label="เอกสาร" items={transactionMenuItems} />
