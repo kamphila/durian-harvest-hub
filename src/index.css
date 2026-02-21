@@ -97,13 +97,13 @@
   }
 
   html {
-    font-size: 24px;
+    font-size: 16px;
   }
 
   body {
     @apply bg-background text-foreground font-sans;
-    font-family: 'TH Sarabun New', 'TH Sarabun PSK', 'Sarabun', sans-serif;
+    font-family: 'Sarabun', 'Noto Sans Thai', sans-serif;
   }
 }
 
-@import url('https://cdn.jsdelivr.net/npm/font-th-sarabun-new@1.0.0/css/font-th-sarabun-new.min.css');
+@import url('https://fonts.googleapis.com/css2?family=Sarabun:wght@300;400;500;600;700&display=swap');
