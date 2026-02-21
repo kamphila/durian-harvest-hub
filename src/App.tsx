@@ -43,6 +43,7 @@ import AlertsDashboard from "./pages/dashboard/AlertsDashboard";
 import FinanceReport from "./pages/reports/FinanceReport";
 import AdminOverviewPage from "./pages/admin/AdminOverviewPage";
 import UserManagementPage from "./pages/admin/UserManagementPage";
+import ProfilePage from "./pages/ProfilePage";
 
 const queryClient = new QueryClient();
 
@@ -54,6 +55,7 @@ function ProtectedRoutes() {
     <AppLayout>
       <Routes>
         <Route path="/" element={<HomePage />} />
+        <Route path="/profile" element={<ProfilePage />} />
 
         {/* Admin */}
         <Route path="/admin/overview" element={<AdminOverviewPage />} />
