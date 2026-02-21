@@ -1,8 +1,9 @@
 import React, { createContext, useContext, useState, ReactNode } from 'react';
 
-export type UserRole = 'owner' | 'manager' | 'purchase' | 'grading' | 'warehouse' | 'sales' | 'finance';
+export type UserRole = 'admin' | 'owner' | 'manager' | 'purchase' | 'grading' | 'warehouse' | 'sales' | 'finance';
 
 export const ROLE_LABELS: Record<UserRole, string> = {
+  admin: 'ผู้ดูแลระบบ',
   owner: 'เจ้าของ',
   manager: 'ผู้จัดการ',
   purchase: 'ฝ่ายรับซื้อ',
@@ -32,11 +33,11 @@ const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 const MOCK_USER: User = {
   id: '1',
-  name: 'สมชาย ทุเรียนทอง',
+  name: 'ผู้ดูแลระบบ',
   email: 'admin@durian.com',
-  role: 'owner',
-  companyId: 'C001',
-  companyName: 'ล้งทุเรียนทอง จำกัด',
+  role: 'admin',
+  companyId: '',
+  companyName: '(ดูแลทุกบริษัท)',
 };
 
 export function AuthProvider({ children }: { children: ReactNode }) {
