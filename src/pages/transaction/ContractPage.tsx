@@ -158,6 +158,9 @@ function printContract(contract: Contract) {
 </html>`;
 
   const container = document.createElement('div');
+  container.style.position = 'fixed';
+  container.style.left = '-9999px';
+  container.style.top = '0';
   container.innerHTML = html;
   document.body.appendChild(container);
 
