@@ -5,11 +5,169 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Card } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { Plus, Pencil, Trash2, Search, QrCode } from 'lucide-react';
+import { Plus, Pencil, Trash2, Search, QrCode, Tag } from 'lucide-react';
 import { toast } from 'sonner';
 import { FormInput, FormSelect } from '@/components/shared/FormField';
 import { Packing, PackingItem, mockPackings } from '@/data/mockTransactions';
 import { mockProducts, mockGrades, mockUnits } from '@/data/mockData';
+
+function printLabel(packing: Packing) {
+  const labels = packing.items.flatMap((item) => {
+    return Array.from({ length: item.quantity }, (_, i) => ({
+      productName: item.productName,
+      gradeName: item.gradeName,
+      unitName: item.unitName,
+      lotNo: packing.lotNo,
+      packDate: packing.date,
+      sourceSupplier: packing.sourceSupplier,
+      sourceDate: packing.sourceDate,
+      boxNo: i + 1,
+      totalBoxes: item.quantity,
+      docNo: packing.docNo,
+    }));
+  });
+
+  const labelHtml = labels.map((l, idx) => `
+    <div class="label" ${idx > 0 && idx % 4 === 0 ? 'style="page-break-before:always;"' : ''}>
+      <div class="label-header">
+        <div class="brand">🍈 ล้งทุเรียน</div>
+        <div class="product-name">${l.productName}</div>
+      </div>
+      <div class="label-body">
+        <div class="grade-badge">${l.gradeName}</div>
+        <div class="info-grid">
+          <div class="info-item">
+            <span class="lbl">Lot No.</span>
+            <span class="val">${l.lotNo}</span>
+          </div>
+          <div class="info-item">
+            <span class="lbl">กล่อง</span>
+            <span class="val">${l.boxNo} / ${l.totalBoxes}</span>
+          </div>
+          <div class="info-item">
+            <span class="lbl">วันที่แพ็ค</span>
+            <span class="val">${l.packDate}</span>
+          </div>
+          <div class="info-item">
+            <span class="lbl">บรรจุภัณฑ์</span>
+            <span class="val">${l.unitName}</span>
+          </div>
+          <div class="info-item full">
+            <span class="lbl">แหล่งที่มา</span>
+            <span class="val">${l.sourceSupplier} (${l.sourceDate})</span>
+          </div>
+        </div>
+        <div class="qr-section">
+          <div class="qr-placeholder">QR</div>
+          <div class="qr-text">${l.lotNo}-${String(l.boxNo).padStart(3, '0')}</div>
+        </div>
+      </div>
+      <div class="label-footer">
+        <span>เอกสาร: ${l.docNo}</span>
+        <span>GAP Certified 🇹🇭</span>
+      </div>
+    </div>
+  `).join('');
+
+  const html = `<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="UTF-8" />
+<title>Label ${packing.docNo}</title>
+<style>
+  @media print {
+    @page { size: A4; margin: 10mm; }
+    body { margin: 0; }
+  }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body { font-family: 'Sarabun', 'Tahoma', sans-serif; padding: 10px; }
+  .labels-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+  .label {
+    border: 2px solid #222;
+    border-radius: 8px;
+    padding: 12px;
+    width: 100%;
+    min-height: 220px;
+    display: flex;
+    flex-direction: column;
+    break-inside: avoid;
+  }
+  .label-header {
+    text-align: center;
+    border-bottom: 2px solid #222;
+    padding-bottom: 8px;
+    margin-bottom: 8px;
+  }
+  .brand { font-size: 14px; font-weight: bold; }
+  .product-name { font-size: 18px; font-weight: bold; margin-top: 2px; }
+  .label-body { flex: 1; }
+  .grade-badge {
+    display: inline-block;
+    background: #222;
+    color: #fff;
+    padding: 2px 14px;
+    border-radius: 4px;
+    font-size: 13px;
+    font-weight: bold;
+    margin-bottom: 8px;
+  }
+  .info-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 4px 12px;
+    font-size: 11px;
+    margin-bottom: 8px;
+  }
+  .info-item { display: flex; flex-direction: column; }
+  .info-item.full { grid-column: 1 / -1; }
+  .lbl { font-size: 9px; color: #666; text-transform: uppercase; letter-spacing: 0.5px; }
+  .val { font-size: 12px; font-weight: bold; }
+  .qr-section { display: flex; align-items: center; gap: 8px; margin-top: 4px; }
+  .qr-placeholder {
+    width: 50px; height: 50px;
+    border: 2px solid #222;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 10px; font-weight: bold; color: #999;
+  }
+  .qr-text { font-family: monospace; font-size: 10px; color: #555; }
+  .label-footer {
+    display: flex;
+    justify-content: space-between;
+    border-top: 1px solid #ccc;
+    padding-top: 6px;
+    margin-top: 8px;
+    font-size: 9px;
+    color: #666;
+  }
+</style>
+</head>
+<body>
+  <div class="labels-grid">
+    ${labelHtml}
+  </div>
+</body>
+</html>`;
+
+  const iframe = document.createElement('iframe');
+  iframe.style.position = 'fixed';
+  iframe.style.left = '-9999px';
+  iframe.style.top = '0';
+  iframe.style.width = '210mm';
+  iframe.style.height = '297mm';
+  document.body.appendChild(iframe);
+
+  const doc = iframe.contentDocument || iframe.contentWindow?.document;
+  if (doc) {
+    doc.open();
+    doc.write(html);
+    doc.close();
+    iframe.onload = () => {
+      iframe.contentWindow?.focus();
+      iframe.contentWindow?.print();
+      setTimeout(() => document.body.removeChild(iframe), 1000);
+    };
+  }
+}
 
 export default function PackingPage() {
   const [data, setData] = useState<Packing[]>(mockPackings);
@@ -109,6 +267,9 @@ export default function PackingPage() {
                 </TableCell>
                 <TableCell className="text-center">
                   <div className="flex items-center justify-center gap-1">
+                    <Button variant="ghost" size="icon" className="h-7 w-7 text-primary hover:text-primary" onClick={() => printLabel(p)} title="พิมพ์ Label สินค้า">
+                      <Tag className="h-3.5 w-3.5" />
+                    </Button>
                     <Button variant="ghost" size="icon" className="h-7 w-7" onClick={() => toast.info(`QR: ${p.lotNo}`)}>
                       <QrCode className="h-3.5 w-3.5" />
                     </Button>
