@@ -1,5 +1,7 @@
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
+import { Printer } from 'lucide-react';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
 
 const topOrchards = [
@@ -20,7 +22,10 @@ const fmt = (n: number) => n.toLocaleString('th-TH');
 export default function PurchaseDashboard() {
   return (
     <div className="space-y-4">
-      <h1 className="text-lg font-bold">📊 Dashboard ฝ่ายรับซื้อ</h1>
+      <div className="flex items-center justify-between print:mb-4">
+        <h1 className="text-lg font-bold">📊 Dashboard ฝ่ายรับซื้อ</h1>
+        <Button variant="outline" size="sm" className="print:hidden" onClick={() => window.print()}><Printer className="h-4 w-4 mr-1" />พิมพ์รายงาน</Button>
+      </div>
       <div className="grid md:grid-cols-2 gap-4">
         <Card>
           <CardHeader className="pb-2"><CardTitle className="text-sm">Top 10 สวน (น้ำหนัก)</CardTitle></CardHeader>

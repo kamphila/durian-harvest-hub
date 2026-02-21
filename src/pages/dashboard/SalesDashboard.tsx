@@ -1,5 +1,7 @@
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
+import { Printer } from 'lucide-react';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
 
 const salesByCustomer = [
@@ -19,7 +21,10 @@ const fmt = (n: number) => n.toLocaleString('th-TH');
 export default function SalesDashboard() {
   return (
     <div className="space-y-4">
-      <h1 className="text-lg font-bold">📊 Dashboard ฝ่ายขาย</h1>
+      <div className="flex items-center justify-between print:mb-4">
+        <h1 className="text-lg font-bold">📊 Dashboard ฝ่ายขาย</h1>
+        <Button variant="outline" size="sm" className="print:hidden" onClick={() => window.print()}><Printer className="h-4 w-4 mr-1" />พิมพ์รายงาน</Button>
+      </div>
       <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
         {[{ l: 'ยอดขายเดือนนี้', v: '฿3.85M' }, { l: 'กำไรต่อ Shipment', v: '฿85,000' }, { l: 'ลูกหนี้คงค้าง', v: '฿770,000' }, { l: 'ระยะเวลารับชำระ', v: '12 วัน' }].map((s) => (
           <Card key={s.l}><CardContent className="pt-4 pb-3 text-center"><p className="text-xs text-muted-foreground">{s.l}</p><p className="text-xl font-bold">{s.v}</p></CardContent></Card>
