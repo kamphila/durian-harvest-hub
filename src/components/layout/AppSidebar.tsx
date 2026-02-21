@@ -2,10 +2,10 @@ import {
   Building2, GitBranch, Users, Package, Ruler, ShoppingCart, Star,
   Scissors, TreeDeciduous, UserCheck, BookOpen, LayoutDashboard,
   FileText, BarChart3, Receipt, Truck, BoxesIcon, Wallet, AlertTriangle,
-  DollarSign, TrendingUp, LogOut, ChevronDown, ShieldCheck, UserCog
+  DollarSign, TrendingUp, LogOut, ChevronDown, ShieldCheck, UserCog, User
 } from 'lucide-react';
 import { NavLink } from '@/components/NavLink';
-import { useAuth, ROLE_LABELS } from '@/contexts/AuthContext';
+import { useAuth, ROLE_LABELS, UserRole } from '@/contexts/AuthContext';
 import {
   Sidebar, SidebarContent, SidebarGroup, SidebarGroupContent,
   SidebarGroupLabel, SidebarMenu, SidebarMenuButton, SidebarMenuItem,
@@ -51,14 +51,18 @@ const dashboardMenuItems = [
 ];
 
 const adminMenuItems = [
-  { title: 'ภาพรวมระบบ', url: '/admin/overview', icon: ShieldCheck },
-  { title: 'จัดการผู้ใช้ / Role', url: '/admin/users', icon: UserCog },
   { title: 'บริษัท (ล้ง)', url: '/master/company', icon: Building2 },
+  { title: 'จัดการผู้ใช้ / Role', url: '/admin/users', icon: UserCog },
 ];
 
 const reportMenuItems = [
   { title: 'รายงานการเงิน', url: '/reports/finance', icon: BarChart3 },
 ];
+
+// Roles that see everything (except admin section)
+const fullAccessRoles: UserRole[] = ['owner', 'warehouse'];
+// Roles that only see transactions
+const transactionOnlyRoles: UserRole[] = ['finance', 'sales', 'grading', 'purchase'];
 
 function MenuGroup({ label, items, defaultOpen = false }: { label: string; items: typeof masterMenuItems; defaultOpen?: boolean }) {
   return (
@@ -93,6 +97,11 @@ function MenuGroup({ label, items, defaultOpen = false }: { label: string; items
 
 export function AppSidebar() {
   const { user, logout } = useAuth();
+  const role = user?.role;
+
+  const isAdmin = role === 'admin';
+  const isFullAccess = role && fullAccessRoles.includes(role);
+  const isTransactionOnly = role && transactionOnlyRoles.includes(role);
 
   return (
     <Sidebar className="border-r-0">
@@ -109,29 +118,64 @@ export function AppSidebar() {
       </SidebarHeader>
 
       <SidebarContent className="px-2 py-2">
+        {/* หน้าหลัก - show for non-admin */}
+        {!isAdmin && (
+          <SidebarGroup>
+            <SidebarGroupContent>
+              <SidebarMenu>
+                <SidebarMenuItem>
+                  <SidebarMenuButton asChild size="sm">
+                    <NavLink to="/" end className="hover:bg-sidebar-accent/50 rounded-md" activeClassName="bg-sidebar-accent text-sidebar-accent-foreground font-medium">
+                      <LayoutDashboard className="h-4 w-4" />
+                      <span>หน้าหลัก</span>
+                    </NavLink>
+                  </SidebarMenuButton>
+                </SidebarMenuItem>
+              </SidebarMenu>
+            </SidebarGroupContent>
+          </SidebarGroup>
+        )}
+
+        {/* Admin section - admin only */}
+        {isAdmin && (
+          <MenuGroup label="ผู้ดูแลระบบ" items={adminMenuItems} defaultOpen />
+        )}
+
+        {/* ข้อมูลหลัก - owner, warehouse, manager */}
+        {isFullAccess && (
+          <MenuGroup label="ข้อมูลหลัก" items={masterMenuItems} defaultOpen />
+        )}
+
+        {/* เอกสาร - owner, warehouse, manager + transaction-only roles */}
+        {(isFullAccess || isTransactionOnly) && (
+          <MenuGroup label="เอกสาร" items={transactionMenuItems} defaultOpen={isTransactionOnly} />
+        )}
+
+        {/* Dashboard - owner, warehouse, manager only */}
+        {isFullAccess && (
+          <MenuGroup label="Dashboard" items={dashboardMenuItems} />
+        )}
+
+        {/* รายงาน - owner, warehouse, manager only */}
+        {isFullAccess && (
+          <MenuGroup label="รายงาน" items={reportMenuItems} />
+        )}
+
+        {/* โปรไฟล์ - all roles */}
         <SidebarGroup>
           <SidebarGroupContent>
             <SidebarMenu>
               <SidebarMenuItem>
                 <SidebarMenuButton asChild size="sm">
-                  <NavLink to="/" end className="hover:bg-sidebar-accent/50 rounded-md" activeClassName="bg-sidebar-accent text-sidebar-accent-foreground font-medium">
-                    <LayoutDashboard className="h-4 w-4" />
-                    <span>หน้าหลัก</span>
+                  <NavLink to="/profile" end className="hover:bg-sidebar-accent/50 rounded-md" activeClassName="bg-sidebar-accent text-sidebar-accent-foreground font-medium">
+                    <User className="h-4 w-4" />
+                    <span>โปรไฟล์ / เปลี่ยนรหัสผ่าน</span>
                   </NavLink>
                 </SidebarMenuButton>
               </SidebarMenuItem>
             </SidebarMenu>
           </SidebarGroupContent>
         </SidebarGroup>
-
-        {user?.role === 'admin' && (
-          <MenuGroup label="ผู้ดูแลระบบ" items={adminMenuItems} defaultOpen />
-        )}
-
-        <MenuGroup label="ข้อมูลหลัก" items={masterMenuItems} defaultOpen />
-        <MenuGroup label="เอกสาร" items={transactionMenuItems} />
-        <MenuGroup label="Dashboard" items={dashboardMenuItems} />
-        <MenuGroup label="รายงาน" items={reportMenuItems} />
       </SidebarContent>
 
       <SidebarFooter className="p-3 border-t border-sidebar-border">
