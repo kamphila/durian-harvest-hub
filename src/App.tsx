@@ -108,7 +108,7 @@ const App = () => (
       <TooltipProvider>
         <Toaster />
         <Sonner />
-        <BrowserRouter>
+        <BrowserRouter basename="/durian-harvest-hub">
           <Routes>
             <Route path="/*" element={<ProtectedRoutes />} />
           </Routes>
