@@ -106,9 +106,7 @@ export function AppSidebar() {
     <Sidebar className="border-r-0">
       <SidebarHeader className="p-4 border-b border-sidebar-border">
         <div className="flex items-center gap-3">
-          <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-sidebar-primary text-sidebar-primary-foreground font-bold text-lg">
-            🍈
-          </div>
+          <img src={`${import.meta.env.BASE_URL}Logo_0.png`} alt="AccuDurian" className="h-10 w-10 rounded-lg object-contain" />
           <div className="flex flex-col min-w-0">
             <span className="font-bold text-sm text-sidebar-foreground truncate">ล้งทุเรียน</span>
             <span className="text-[10px] text-sidebar-foreground/60 truncate">{user?.companyName}</span>

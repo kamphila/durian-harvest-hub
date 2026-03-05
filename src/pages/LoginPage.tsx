@@ -43,7 +43,7 @@ export default function LoginPage() {
     <div className="min-h-screen flex items-center justify-center bg-primary p-4">
       <Card className="w-full max-w-sm shadow-2xl">
         <CardHeader className="text-center pb-2">
-          <div className="text-5xl mb-2">🍈</div>
+          <img src={`${import.meta.env.BASE_URL}Logo_1.png`} alt="AccuDurian" className="h-20 mx-auto mb-2 object-contain" />
           <h1 className="text-xl font-bold text-foreground">ระบบล้งทุเรียน</h1>
           <p className="text-xs text-muted-foreground">Durian Packing House</p>
         </CardHeader>
