@@ -31,6 +31,7 @@ import SalesPage from "./pages/transaction/SalesPage";
 import DepositReceivePage from "./pages/transaction/DepositReceivePage";
 import ExpensePage from "./pages/transaction/ExpensePage";
 import InventoryPage from "./pages/transaction/InventoryPage";
+import PurchasePricePage from "./pages/transaction/PurchasePricePage";
 
 // Dashboards
 import ExecutiveDashboard from "./pages/dashboard/ExecutiveDashboard";
@@ -83,6 +84,7 @@ function ProtectedRoutes() {
         <Route path="/transaction/deposit-receive" element={<DepositReceivePage />} />
         <Route path="/transaction/expense" element={<ExpensePage />} />
         <Route path="/transaction/inventory" element={<InventoryPage />} />
+        <Route path="/transaction/purchase-price" element={<PurchasePricePage />} />
 
         {/* Dashboards */}
         <Route path="/dashboard/executive" element={<ExecutiveDashboard />} />

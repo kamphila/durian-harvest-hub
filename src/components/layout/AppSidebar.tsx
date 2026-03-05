@@ -2,7 +2,7 @@ import {
   Building2, GitBranch, Users, Package, Ruler, ShoppingCart, Star,
   Scissors, TreeDeciduous, UserCheck, BookOpen, LayoutDashboard,
   FileText, BarChart3, Receipt, Truck, BoxesIcon, Wallet, AlertTriangle,
-  DollarSign, TrendingUp, LogOut, ChevronDown, ShieldCheck, UserCog, User
+  DollarSign, TrendingUp, LogOut, ChevronDown, ShieldCheck, UserCog, User, Tags
 } from 'lucide-react';
 import { NavLink } from '@/components/NavLink';
 import { useAuth, ROLE_LABELS, UserRole } from '@/contexts/AuthContext';
@@ -29,6 +29,7 @@ const masterMenuItems = [
 ];
 
 const transactionMenuItems = [
+  { title: 'กำหนดราคารับซื้อ', url: '/transaction/purchase-price', icon: Tags },
   { title: 'รับซื้อ', url: '/transaction/purchase', icon: Receipt },
   { title: 'สัญญาซื้อเหมาสวน', url: '/transaction/contract', icon: FileText },
   { title: 'จ่ายมัดจำล่วงหน้า', url: '/transaction/advance-payment', icon: Wallet },
